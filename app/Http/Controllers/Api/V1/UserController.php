@@ -8,12 +8,17 @@ use Illuminate\Http\Request;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Resources\V1\UserCollection;
 use App\Http\Requests\V1\UpdateUserRequest;
+use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\Sanctum;
+use Symfony\Component\HttpFoundation\Session\Session as SessionSession;
 
 class UserController extends Controller
 {
@@ -53,7 +58,6 @@ class UserController extends Controller
      */
     public function Register(RegisterRequest $request)
     {
-
         $user = new UserResource(User::create([
             "first_name" => $request->firstName,
             "last_name" => $request->lastName,
@@ -64,12 +68,10 @@ class UserController extends Controller
 
         $token = $user->createToken("myToken")->plainTextToken;
 
-        $response = [
-            "user" => $user,
-            "token" => $token,
-        ];
+        $user["token"] = $token;
+        $user->save();
 
-        return response($response, 201);
+        return response([$user], 201);
     }
 
     /*
@@ -100,13 +102,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, string $id)
     {
-        User::find($id)->update([
-            "first_name" => $request->firstName,
-            "last_name" => $request->lastName,
-            "phone" => $request->phone,
-            "location" => $request->location,
-            "password" => bcrypt($request->password),
-        ]);
+        User::find($id)->update([$request->all(),"password" => bcrypt($request->password)]);
     }
 
     public function purchasedProducts()

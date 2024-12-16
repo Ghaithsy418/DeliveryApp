@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string("location",50);
             $table->string('password');
             $table->string("image_source")->default("");
+            $table->string("token")->default("");
             $table->rememberToken();
             $table->timestamps();
         });
