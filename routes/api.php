@@ -24,7 +24,7 @@ Route::group(["prefix"=>"v1"],function(){
     Route::group(["middleware" => ["auth:sanctum"]],function(){
 
         /*
-            ################### User Routes (Authenticated) ###################
+            ################### User Routes (Authentication required) ###################
         */
         Route::apiResource("users",UserController::class);
         Route::post("/logout",[UserController::class,"Logout"]);
@@ -35,7 +35,7 @@ Route::group(["prefix"=>"v1"],function(){
         // ################################################################################
 
         /*
-            ################### Product Routes (Authenticated) ###################
+            ################### Product Routes (Authentication required) ###################
         */
         Route::apiResource("products",ProductController::class);
         Route::middleware(["startsession","shareerrors"])->group(function(){
@@ -43,20 +43,21 @@ Route::group(["prefix"=>"v1"],function(){
             Route::get("get-cart",[ProductController::class,"GetCart"]);
             Route::delete("/delete-cart-product/{id}",[ProductController::class,"DeleteCartProduct"]);
             Route::post("/product-update/{id}",[ProductController::class,"update"]);
+            Route::post("/purchase-products",[ProductController::class,"purchase"]);
         });
 
         // ################################################################################
 
 
         /*
-            ################### Store Routes (Authenticated) ###################
+            ################### Store Routes (Authentication required) ###################
         */
         Route::apiResource("stores",StoreController::class);
         Route::delete("/delete-all/{id}",[StoreController::class,"destroyAll"]);
         Route::post("/store-update/{id}",[StoreController::class,"update"]);
     });
 
-    // User Routes (Unauthenticated)
+    // User Routes (NO Auth required)
     Route::post("/register",[UserController::class,"Register"]);
     Route::post("/login",[UserController::class,"Login"]);
 });

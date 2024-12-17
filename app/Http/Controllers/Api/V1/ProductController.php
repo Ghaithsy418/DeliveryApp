@@ -12,6 +12,7 @@ use App\Models\Cart;
 use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 class ProductController extends Controller
@@ -115,4 +116,50 @@ class ProductController extends Controller
             "new cart" => Session::get("cart" . (string)$currUserId),
         ], 200);
     }
+
+    public function purchase()
+    {
+
+        $user_id = Auth::user()->id;
+
+        $cart = Session::get("cart" . (string)$user_id);
+
+
+        if(!$cart) return response(["message" => "Nothing to purchase :("]);
+
+        foreach($cart->items as $product){
+            $product_id = $product["item"]["id"];
+            $quantity = $product["quantity"];
+
+            $product = Product::find($product_id);
+
+            $product->update([
+                "count" => $product->count - $quantity,
+                "sold_count" => $product->count + $quantity,
+            ]);
+
+            $column = DB::table("users_products_pivot")->where("user_id",$user_id)->where("product_id",$product_id);
+            $exist = $column->first();
+
+            if(!empty($exist)) {
+                $column->update([
+                    "quantity" => $exist->quantity + $quantity,
+                ]);
+            }
+            else{
+                DB::table("users_products_pivot")->insert([
+                    "user_id" => $user_id,
+                    "product_id" => $product_id,
+                    "quantity" => $quantity,
+                ]);
+            }
+
+        }
+        $response = [$cart];
+
+        Session::forget("cart".(string)$user_id);
+
+        return response($response,200);
+    }
+
 }
