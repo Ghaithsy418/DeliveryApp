@@ -21,11 +21,11 @@ class StoreController extends Controller
 
         if ($request->query("withProducts")) {
             $storesQuery->with("products");
+            $stores = $storesQuery->paginate()->appends($request->query());
+            return new StoreCollection($stores);
         }
+        return new StoreCollection(Store::all());
 
-        $stores = $storesQuery->paginate()->appends($request->query());
-
-        return new StoreCollection($stores);
     }
 
     /**

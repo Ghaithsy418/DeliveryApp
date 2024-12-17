@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\FavoriteController;
 use App\Http\Controllers\api\v1\ProductController;
 use App\Http\Controllers\api\v1\StoreController;
 use App\Http\Controllers\api\v1\UserController;
@@ -55,6 +56,16 @@ Route::group(["prefix"=>"v1"],function(){
         Route::apiResource("stores",StoreController::class);
         Route::delete("/delete-all/{id}",[StoreController::class,"destroyAll"]);
         Route::post("/store-update/{id}",[StoreController::class,"update"]);
+
+        // ################################################################################
+
+        /*
+            ################## Favorite Routes (Authentication required) ##################
+        */
+
+        Route::post("/add-favorite/{id}",[FavoriteController::class,"addFavorite"]);
+        Route::get("/get-favorite",[FavoriteController::class,"getFavorite"]);
+        Route::get("/product-is-favorite/{id}",[FavoriteController::class,"productIsFavorite"]);
     });
 
     // User Routes (NO Auth required)
