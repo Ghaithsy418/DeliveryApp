@@ -21,27 +21,14 @@ class UpdateStoreRequest extends FormRequest
      */
     public function rules(): array
     {
-        $method = $this->method();
-
-        if($method === "PUT"){
-            return [
-                "name" => ["required","unique:stores,name"],
-                "type" => ["required"],
-                "description" => ["required"],
-                "location" => ["required"],
-            ];
-        }else{
-            return [
-                "name" => ["sometimes","required","unique:stores,name"],
-                "type" => ["sometimes","required"],
-                "description" => ["sometimes","required"],
-                "location" => ["sometimes","required"],
-            ];
-        }
+        return [
+            "name" => ["sometimes", "unique:stores,name"],
+        ];
     }
 
-    public function prepareForValidation(){
-        if($this->imageSource){
+    public function prepareForValidation()
+    {
+        if ($this->imageSource) {
             $this->merge([
                 "image_source" => $this->imageSource,
             ]);

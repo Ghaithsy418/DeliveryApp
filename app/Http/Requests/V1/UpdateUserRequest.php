@@ -21,7 +21,6 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $method = $this->method();
         return [
             "first_name" => ["sometimes"],
             "last_name" => ["sometimes"],

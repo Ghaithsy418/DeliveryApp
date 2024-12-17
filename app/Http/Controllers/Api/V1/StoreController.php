@@ -19,14 +19,13 @@ class StoreController extends Controller
     {
         $storesQuery = Store::query();
 
-        if($request->query("withProducts")){
+        if ($request->query("withProducts")) {
             $storesQuery->with("products");
         }
 
         $stores = $storesQuery->paginate()->appends($request->query());
 
         return new StoreCollection($stores);
-
     }
 
     /**
@@ -44,7 +43,7 @@ class StoreController extends Controller
     {
         $includeProducts = Request()->query("withProducts");
 
-        if($includeProducts)
+        if ($includeProducts)
             return new StoreResource($store->loadMissing("products"));
 
         return new StoreResource($store);
@@ -53,32 +52,34 @@ class StoreController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateStoreRequest $request, Store $store)
+    public function update(UpdateStoreRequest $request, string $id)
     {
+        $store = Store::find($id);
         $store->update($request->all());
-
-        return response([new StoreResource($store)],200);
+        return new StoreResource($store);
     }
 
-    public function destroy(string $id){
+    public function destroy(string $id)
+    {
         $store = Store::find($id);
         $store->delete();
 
         return response([
-            "message"=> "the store $store->name has been deleted successfully",
-        ],200);
+            "message" => "the store $store->name has been deleted successfully",
+        ], 200);
     }
 
-    public function destroyAll(string $id){
+    public function destroyAll(string $id)
+    {
         $store = Store::find($id);
         $products = $store->products;
-        foreach($products as $product){
+        foreach ($products as $product) {
             $product->delete();
         }
         $store->delete();
 
         return response([
-            "message"=> "the store $store->name and it's products have been deleted successfully",
-        ],200);
+            "message" => "the store $store->name and it's products have been deleted successfully",
+        ], 200);
     }
 }

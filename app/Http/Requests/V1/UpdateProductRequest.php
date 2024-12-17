@@ -21,26 +21,9 @@ class UpdateProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        $method = $this->method();
-        if($method === "PUT"){
             return [
-                "name" => ["required"],
-                "ingredients" => ["required"],
-                "type" => ["required"],
-                "price" => ["required"],
-                "count" => ["required"],
                 "image_source" => ["sometimes","string"],
             ];
-        }else{
-            return [
-                "name" => ["sometimes"],
-                "ingredients" => ["sometimes"],
-                "type" => ["sometimes"],
-                "price" => ["sometimes"],
-                "count" => ["sometimes"],
-                "image_source" => ["sometimes","string"],
-            ];
-        }
     }
 
     public function prepareForValidation(){

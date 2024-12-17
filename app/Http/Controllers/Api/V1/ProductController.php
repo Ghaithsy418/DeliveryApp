@@ -44,22 +44,25 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, string $id)
     {
-        $product->update($request->validated());
+        $product = Product::find($id);
+        $product->update($request->all());
         return new ProductResource($product);
     }
 
-    public function destroy(string $id){
+    public function destroy(string $id)
+    {
         $product = Product::find($id);
         $product->delete();
 
         return response([
             "message" => "the product that has the id $product->id has been deleted successfully",
-        ],200);
+        ], 200);
     }
 
-    public function AddToCart(Request $request,string $id){
+    public function AddToCart(Request $request, string $id)
+    {
 
         $quantity = $request->validate([
             "quantity" => "required",
@@ -67,26 +70,28 @@ class ProductController extends Controller
 
         $product = Product::find($id);
         $currUserId = Auth::user()->id;
-        $oldCart = Session::has("cart".(string)$currUserId) ? Session::get("cart".(string)$currUserId) : null;
+        $oldCart = Session::has("cart" . (string)$currUserId) ? Session::get("cart" . (string)$currUserId) : null;
         $cart = new Cart($oldCart);
-        $cart->add($product,$product->id,$quantity["quantity"]);
+        $cart->add($product, $product->id, $quantity["quantity"]);
 
-        Session::put("cart".(string)$currUserId,$cart);
+        Session::put("cart" . (string)$currUserId, $cart);
 
         return response([
             "message" => "Added Successfully",
             "cart" => $cart,
-        ],200);
+        ], 200);
     }
 
-    public function GetCart(){
+    public function GetCart()
+    {
         $currUserId = Auth::user()->id;
         return response([
-            "Cart" => Session::get("cart".(string)$currUserId),
-        ],200);
+            "Cart" => Session::get("cart" . (string)$currUserId),
+        ], 200);
     }
 
-    public function DeleteCartProduct(Request $request,string $id){
+    public function DeleteCartProduct(Request $request, string $id)
+    {
 
         $quantity = $request->validate([
             "quantity" => "required",
@@ -94,21 +99,20 @@ class ProductController extends Controller
 
         $currUserId = Auth::user()->id;
         $product = Product::find($id);
-        $oldCart = Session::get("cart".(string)$currUserId);
+        $oldCart = Session::get("cart" . (string)$currUserId);
         $cart = new Cart($oldCart);
 
-        $bool = $cart->delete($product,$id,$quantity["quantity"]);
+        $bool = $cart->delete($product, $id, $quantity["quantity"]);
 
-        Session::put("cart".(string)$currUserId,$cart);
+        Session::put("cart" . (string)$currUserId, $cart);
 
-        if(!$bool) return response([
+        if (!$bool) return response([
             "message" => "Bad Request (Nothing to delete here or Problem with the Quantity)",
-        ],400);
+        ], 400);
 
         return response([
             "message" => "Deleted Successfully",
-            "new cart" => Session::get("cart".(string)$currUserId),
-        ],200);
+            "new cart" => Session::get("cart" . (string)$currUserId),
+        ], 200);
     }
-
 }

@@ -42,6 +42,7 @@ Route::group(["prefix"=>"v1"],function(){
             Route::post("/add-to-cart/{id}",[ProductController::class,"AddToCart"]);
             Route::get("get-cart",[ProductController::class,"GetCart"]);
             Route::delete("/delete-cart-product/{id}",[ProductController::class,"DeleteCartProduct"]);
+            Route::post("/product-update/{id}",[ProductController::class,"update"]);
         });
 
         // ################################################################################
@@ -52,6 +53,7 @@ Route::group(["prefix"=>"v1"],function(){
         */
         Route::apiResource("stores",StoreController::class);
         Route::delete("/delete-all/{id}",[StoreController::class,"destroyAll"]);
+        Route::post("/store-update/{id}",[StoreController::class,"update"]);
     });
 
     // User Routes (Unauthenticated)

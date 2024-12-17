@@ -47,9 +47,13 @@ class UserController extends Controller
         }
 
         $token = $user->createToken("myToken")->plainTextToken;
-        $response = ["user" => $user, "token" => $token];
 
-        return response($response, 201);
+        $user["token"] = $token;
+        $user->save();
+
+        $user_datas = new UserResource(User::find($user->id));
+
+        return response([$user_datas], 200);
     }
 
 
@@ -102,7 +106,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, string $id)
     {
-        User::find($id)->update([$request->all(),"password" => bcrypt($request->password)]);
+        User::find($id)->update([$request->all(), "password" => bcrypt($request->password)]);
     }
 
     public function purchasedProducts()

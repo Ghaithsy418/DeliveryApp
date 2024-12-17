@@ -23,10 +23,10 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "first_name" => ["required"],
-            "last_name" => ["required"],
+            // "first_name" => ["required"],
+            // "last_name" => ["required"],
             "phone" => ["required","unique:users,phone","max:11"],
-            "location" => ["required"],
+            // "location" => ["required"],
             "password" => ["required","min:8","string"],
         ];
     }
@@ -42,7 +42,6 @@ class RegisterRequest extends FormRequest
         $this->merge([
             "first_name" => $this->firstName,
             "last_name" => $this->lastName,
-            "password_confirmation" => $this->passwordConfirmation,
         ]);
     }
 
