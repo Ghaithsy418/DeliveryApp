@@ -36,7 +36,7 @@ Route::group(["prefix"=>"v1"],function(){
         // ################################################################################
 
         /*
-            ################### Product Routes (Authentication required) ###################
+        ################### Product Routes (Authentication required) ###################
         */
         Route::apiResource("products",ProductController::class);
         Route::middleware(["startsession","shareerrors"])->group(function(){
@@ -45,6 +45,7 @@ Route::group(["prefix"=>"v1"],function(){
             Route::delete("/delete-cart-product/{id}",[ProductController::class,"DeleteCartProduct"]);
             Route::post("/product-update/{id}",[ProductController::class,"update"]);
             Route::post("/purchase-products",[ProductController::class,"purchase"]);
+            Route::get("/categories/{type}",[ProductController::class,"categories"]);
         });
 
         // ################################################################################

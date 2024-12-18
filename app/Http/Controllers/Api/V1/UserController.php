@@ -13,6 +13,7 @@ use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -42,7 +43,7 @@ class UserController extends Controller
 
         if (!$user || !Hash::check($data["password"], $user->password)) {
             return response([
-                "message" => "bad Datas",
+                "message" => "Your phone or password isn't correct plz try again",
             ], 401);
         }
 
@@ -62,20 +63,20 @@ class UserController extends Controller
      */
     public function Register(RegisterRequest $request)
     {
-        $user = new UserResource(User::create([
-            "first_name" => $request->firstName,
-            "last_name" => $request->lastName,
-            "phone" => $request->phone,
-            "location" => $request->location,
-            "password" => bcrypt($request->password),
-        ]));
+            $user = new UserResource(User::create([
+                "first_name" => $request->firstName,
+                "last_name" => $request->lastName,
+                "phone" => $request->phone,
+                "location" => $request->location,
+                "password" => bcrypt($request->password),
+            ]));
 
-        $token = $user->createToken("myToken")->plainTextToken;
+            $token = $user->createToken("myToken")->plainTextToken;
 
-        $user["token"] = $token;
-        $user->save();
+            $user["token"] = $token;
+            $user->save();
 
-        return response([$user], 201);
+            return response([$user], 201);
     }
 
     /*
@@ -88,9 +89,9 @@ class UserController extends Controller
         $token = PersonalAccessToken::find($accessToken);
         $token->delete();
 
-        return [
-            "message" => "you logged out Successfully"
-        ];
+        return response([
+            "message" => "You logged out Successfully"
+        ], 200);
     }
 
     /**
@@ -106,10 +107,21 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, string $id)
     {
-        User::find($id)->update([$request->all(), "password" => bcrypt($request->password)]);
+        $user = User::find($id);
+
+        if(!$user){
+            return response([
+                "message" => "didn't find the user",
+            ],404);
+        }
+
+        $user->update($request->all());
+        $user->save();
+
+        return new UserResource($user);
     }
 
-    public function purchasedProducts()
+    public function purchasedProducts(): mixed
     {
         $user = Auth::user();
         return $user->products;

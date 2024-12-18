@@ -162,4 +162,9 @@ class ProductController extends Controller
         return response($response,200);
     }
 
+    public function categories(string $type){
+        $product = Product::where("type",$type)->get();
+        return $product;
+    }
 }
+

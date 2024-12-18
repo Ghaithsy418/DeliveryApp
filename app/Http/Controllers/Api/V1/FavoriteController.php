@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\ProductCollection;
 use App\Http\Resources\V1\ProductResource;
 use App\Models\Favorite;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,12 @@ class FavoriteController extends Controller
     public function addFavorite(string $id)
     {
         $user_id = Auth::user()->id;
+        $product = Product::find($id);
+
+        if(!$product) return response([
+            "message" => "there is no product with this id",
+        ],404);
+
         $exist = Favorite::where("user_id", $user_id)->where("product_id", $id)->first();
         if (!empty($exist)) {
             $exist->delete();
@@ -49,6 +56,6 @@ class FavoriteController extends Controller
         $exist = Favorite::where("user_id", $user_id)->where("product_id", $id)->first();
 
         if (empty($exist)) return response(["Answer" => false], 200);
-        else return response(["Answer" => true],200);
+        else return response(["Answer" => true], 200);
     }
 }

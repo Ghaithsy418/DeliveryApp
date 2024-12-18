@@ -26,7 +26,6 @@ class UpdateUserRequest extends FormRequest
             "last_name" => ["sometimes"],
             "phone" => ["sometimes", "unique:users,phone", "max:11"],
             "location" => ["sometimes"],
-            "password" => ["sometimes", "min:8"],
             "token" => ["sometimes"],
         ];
     }
