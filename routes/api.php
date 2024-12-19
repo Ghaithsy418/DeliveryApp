@@ -31,7 +31,7 @@ Route::group(["prefix"=>"v1"],function(){
         Route::post("/logout",[UserController::class,"Logout"]);
         Route::get("/search/{name}",[UserController::class,"search"]);
         Route::get("/purchases",[UserController::class,"purchasedProducts"]);
-        Route::post("/user-update/{id}",[UserController::class,"update"]);
+        Route::post("/user-update",[UserController::class,"update"]);
 
         // ################################################################################
 

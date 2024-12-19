@@ -63,20 +63,20 @@ class UserController extends Controller
      */
     public function Register(RegisterRequest $request)
     {
-            $user = new UserResource(User::create([
-                "first_name" => $request->firstName,
-                "last_name" => $request->lastName,
-                "phone" => $request->phone,
-                "location" => $request->location,
-                "password" => bcrypt($request->password),
-            ]));
+        $user = new UserResource(User::create([
+            "first_name" => $request->firstName,
+            "last_name" => $request->lastName,
+            "phone" => $request->phone,
+            "location" => $request->location,
+            "password" => bcrypt($request->password),
+        ]));
 
-            $token = $user->createToken("myToken")->plainTextToken;
+        $token = $user->createToken("myToken")->plainTextToken;
 
-            $user["token"] = $token;
-            $user->save();
+        $user["token"] = $token;
+        $user->save();
 
-            return response([$user], 201);
+        return response([$user], 201);
     }
 
     /*
@@ -105,14 +105,15 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUserRequest $request, string $id)
+    public function update(UpdateUserRequest $request)
     {
-        $user = User::find($id);
+        $user_id = Auth::user()->id;
+        $user = User::find($user_id);
 
-        if(!$user){
+        if (!$user) {
             return response([
                 "message" => "didn't find the user",
-            ],404);
+            ], 404);
         }
 
         $user->update($request->all());
