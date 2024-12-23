@@ -9,7 +9,7 @@ use App\Http\Requests\V1\UpdateProductRequest;
 use App\Http\Resources\V1\ProductCollection;
 use App\Http\Resources\V1\ProductResource;
 use App\Models\Cart;
-use App\Models\Store;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Session;
 
 class ProductController extends Controller
 {
+
 
     /**
      * Display a listing of the resource.
@@ -31,7 +32,22 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        return new ProductResource(Product::create($request->all()));
+        if ($request->hasFile("imageSource")){
+            $path = $request->file("imageSource")->store("products-images","public");
+            return new ProductResource(Product::create([
+                "name" => $request->name,
+                "description" => $request->description,
+                "category" => $request->category,
+                "price" => $request->price,
+                "count" => $request->count,
+                "store_id" => $request->storeId,
+                "sold_count" => $request->soldCount,
+                "image_source" => $path,
+            ]));
+        }
+        else{
+            return new ProductResource(Product::create($request->all()));
+        }
     }
 
     /**
@@ -70,46 +86,68 @@ class ProductController extends Controller
         ]);
 
         $product = Product::find($id);
-        $currUserId = Auth::user()->id;
-        $oldCart = Session::has("cart" . (string)$currUserId) ? Session::get("cart" . (string)$currUserId) : null;
-        $cart = new Cart($oldCart);
+
+        if(!$product) return response(["message" => "No Product with this id"],404);
+
+        $curr_user_id = Auth::user()->id;
+        $old_cart = Session::has("cart" . (string)$curr_user_id) ? Session::get("cart" . (string)$curr_user_id) : null;
+        $cart = new Cart($old_cart);
         $cart->add($product, $product->id, $quantity["quantity"]);
 
-        Session::put("cart" . (string)$currUserId, $cart);
+        Session::put("cart" . (string)$curr_user_id, $cart);
 
         return response([
             "message" => "Added Successfully",
             "cart" => $cart,
-        ], 200);
+        ], 201);
+    }
+
+    public function AddAllToCart(){
+        $user_id = Auth::user()->id;
+        $user = User::find($user_id);
+
+        $favoriteProducts = $user->favorites()->with("product")->get()->map(function ($favorite) {
+            return $favorite->product;
+        });
+
+        $old_cart = Session::has("cart" . (string)$user_id) ? Session::get("cart" . (string)$user_id) : null;
+        $cart = new Cart($old_cart);
+
+        foreach($favoriteProducts as $product){
+            $cart->add($product,$product->id,1);
+        }
+        Session::put("cart" . (string)$user_id, $cart);
+
+        return [$cart];
+
     }
 
     public function GetCart()
     {
         $currUserId = Auth::user()->id;
         return response([
-            "Cart" => Session::get("cart" . (string)$currUserId),
+            "cart" => Session::get("cart" . (string)$currUserId),
         ], 200);
     }
 
     public function DeleteCartProduct(Request $request, string $id)
     {
 
-        $quantity = $request->validate([
-            "quantity" => "required",
-        ]);
-
         $currUserId = Auth::user()->id;
         $product = Product::find($id);
+
+        if(!$product) return response(["message" => "No Product with this id"],404);
+
         $oldCart = Session::get("cart" . (string)$currUserId);
         $cart = new Cart($oldCart);
 
-        $bool = $cart->delete($product, $id, $quantity["quantity"]);
+        $bool = $cart->delete($product, $id);
 
         Session::put("cart" . (string)$currUserId, $cart);
 
         if (!$bool) return response([
-            "message" => "Bad Request (Nothing to delete here or Problem with the Quantity)",
-        ], 400);
+            "message" => "Nothing to delete here",
+        ], 404);
 
         return response([
             "message" => "Deleted Successfully",
@@ -125,9 +163,9 @@ class ProductController extends Controller
         $cart = Session::get("cart" . (string)$user_id);
 
 
-        if(!$cart) return response(["message" => "Nothing to purchase :("]);
+        if (!$cart) return response(["message" => "Nothing to purchase :("]);
 
-        foreach($cart->items as $product){
+        foreach ($cart->items as $product) {
             $product_id = $product["item"]["id"];
             $quantity = $product["quantity"];
 
@@ -138,33 +176,31 @@ class ProductController extends Controller
                 "sold_count" => $product->count + $quantity,
             ]);
 
-            $column = DB::table("users_products_pivot")->where("user_id",$user_id)->where("product_id",$product_id);
+            $column = DB::table("users_products_pivot")->where("user_id", $user_id)->where("product_id", $product_id);
             $exist = $column->first();
 
-            if(!empty($exist)) {
+            if (!empty($exist)) {
                 $column->update([
                     "quantity" => $exist->quantity + $quantity,
                 ]);
-            }
-            else{
+            } else {
                 DB::table("users_products_pivot")->insert([
                     "user_id" => $user_id,
                     "product_id" => $product_id,
                     "quantity" => $quantity,
                 ]);
             }
-
         }
         $response = [$cart];
 
-        Session::forget("cart".(string)$user_id);
+        Session::forget("cart" . (string)$user_id);
 
-        return response($response,200);
+        return response($response, 200);
     }
 
-    public function categories(string $type){
-        $product = Product::where("type",$type)->get();
+    public function categories(string $type)
+    {
+        $product = Product::where("type", $type)->get();
         return $product;
     }
 }
-

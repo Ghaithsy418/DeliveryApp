@@ -41,6 +41,7 @@ Route::group(["prefix"=>"v1"],function(){
         Route::apiResource("products",ProductController::class);
         Route::middleware(["startsession","shareerrors"])->group(function(){
             Route::post("/add-to-cart/{id}",[ProductController::class,"AddToCart"]);
+            Route::post("/add-all-to-cart",[ProductController::class,"addAllToCart"]);
             Route::get("get-cart",[ProductController::class,"GetCart"]);
             Route::delete("/delete-cart-product/{id}",[ProductController::class,"DeleteCartProduct"]);
             Route::post("/product-update/{id}",[ProductController::class,"update"]);
@@ -66,7 +67,6 @@ Route::group(["prefix"=>"v1"],function(){
 
         Route::post("/add-favorite/{id}",[FavoriteController::class,"addFavorite"]);
         Route::get("/get-favorite",[FavoriteController::class,"getFavorite"]);
-        Route::get("/product-is-favorite/{id}",[FavoriteController::class,"productIsFavorite"]);
     });
 
     // User Routes (NO Auth required)

@@ -4,50 +4,58 @@ namespace App\Models;
 
 class Cart
 {
-
     public $items = [];
-    public $totalQuantity = 0;
-    public $totalPrice = 0;
+    public $total_quantity = 0;
+    public $total_price = 0;
 
-    public function __construct($oldCart)
+    public function __construct($old_cart)
     {
-        if ($oldCart) {
-            $this->items = $oldCart->items;
-            $this->totalQuantity = $oldCart->totalQuantity;
-            $this->totalPrice = $oldCart->totalPrice;
+        if ($old_cart) {
+            $this->items = $old_cart->items;
+            $this->total_quantity = $old_cart->total_quantity;
+            $this->total_price = $old_cart->total_price;
         }
     }
 
-    public function add($item, $id,$quantity)
+    public function add($item, $id, $quantity)
     {
+        $curr_item = null;
 
-        $currItem = ["quantity" => 0, "price" => $item->price, "item" => $item];
-        if (array_key_exists($id, $this->items)) {
-            $currItem = $this->items[$id];
+        foreach ($this->items as &$cart_item) {
+            if ($cart_item["item"]->id === $id) {
+                $curr_item = &$cart_item;
+                break;
+            }
         }
-        $currItem["quantity"] += $quantity;
-        $currItem["price"] = $item->price * $currItem["quantity"];
-        $this->items[$id] = $currItem;
-        $this->totalQuantity += $quantity;
-        $this->totalPrice += ($item->price * $quantity);
+
+        if ($curr_item) {
+            $curr_item["quantity"] += $quantity;
+            $curr_item["price"] = $item->price * $curr_item["quantity"];
+        } else {
+            $curr_item = [
+                "quantity" => $quantity,
+                "price" => $item->price * $quantity,
+                "item" => $item
+            ];
+            $this->items[] = $curr_item;
+        }
+
+        $this->total_quantity += $quantity;
+        $this->total_price += ($item->price * $quantity);
     }
 
-    public function delete($item, $id,$quantity)
+
+    public function delete($item, $id)
     {
-        if (!array_key_exists($id, $this->items)) {
-            return false;
+        foreach ($this->items as $key => $curr_item) {
+            if ($curr_item['item']['id'] === $item->id) {
+                $this->total_quantity -= $curr_item['quantity'];
+                $this->total_price -= $curr_item['price'];
+                unset($this->items[$key]);
+                $this->items = array_values($this->items);
+                return true;
+            }
         }
-
-        if($this->items[$id]["quantity"] < $quantity) return false;
-
-        $this->items[$id]["quantity"] -= $quantity;
-        $this->items[$id]["price"] -= ($item->price * $quantity);
-        if($this->items[$id]["quantity"] === 0){
-            unset($this->items[$id]);
-        }
-        $this->totalQuantity -= $quantity;
-        $this->totalPrice -= ($item->price * $quantity);
-
-        return true;
+        return false;
     }
 }

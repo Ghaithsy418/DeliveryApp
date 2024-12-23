@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string("name",25);
-            $table->text("ingredients");
-            $table->string("type",25); // Food , Electronics , Gifts ......
+            $table->text("description");
+            $table->string("category",25); // Food , Electronics , Gifts ......
             $table->integer("price");
             $table->integer("count");
             $table->integer("sold_count")->default(0);

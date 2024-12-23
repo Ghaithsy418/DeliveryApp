@@ -23,8 +23,8 @@ class StoreProductRequest extends FormRequest
     {
         return [
             "name" => ["required"],
-            "ingredients" => ["required"],
-            "type" => ["required"],
+            "description" => ["required"],
+            "category" => ["required"],
             "price" => ["required"],
             "count" => ["required"],
             "store_id" => ["required"],

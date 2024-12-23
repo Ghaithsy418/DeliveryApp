@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Resources\V1\UserCollection;
 use App\Http\Requests\V1\UpdateUserRequest;
+use App\Http\Resources\V1\UserWithSessionIdResource;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Store;
@@ -53,7 +54,6 @@ class UserController extends Controller
         $user->save();
 
         $user_datas = new UserResource(User::find($user->id));
-
         return response([$user_datas], 200);
     }
 

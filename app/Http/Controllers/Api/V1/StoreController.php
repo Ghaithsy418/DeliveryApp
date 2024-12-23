@@ -9,6 +9,8 @@ use App\Http\Requests\V1\UpdateStoreRequest;
 use App\Http\Resources\V1\StoreResource;
 use App\Http\Resources\V1\StoreCollection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Response;
 
 class StoreController extends Controller
 {
@@ -22,10 +24,15 @@ class StoreController extends Controller
         if ($request->query("withProducts")) {
             $storesQuery->with("products");
             $stores = $storesQuery->paginate()->appends($request->query());
-            return new StoreCollection($stores);
+            $products_count = DB::table("products")->count();
+            $stores_count = DB::table("stores")->count();
+            return response([
+                "data" => new StoreCollection($stores),
+                "productsCount" => $products_count,
+                "storesCount" => $stores_count,
+            ], 200);
         }
         return new StoreCollection(Store::all());
-
     }
 
     /**
@@ -33,7 +40,15 @@ class StoreController extends Controller
      */
     public function store(StoreStoreRequest $request)
     {
-        return new StoreResource(Store::create($request->all()));
+        $path = $request->file("imageSource")->store("stores-images", "public");
+
+        return new StoreResource(Store::create([
+            "name" => $request->name,
+            "type" => $request->type,
+            "description" => $request->description,
+            "location" => $request->location,
+            "image_source" => $path,
+        ]));
     }
 
     /**

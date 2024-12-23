@@ -27,6 +27,7 @@ class FavoriteController extends Controller
             $exist->delete();
             return response([
                 "message" => "Deleted Successfully 🚫",
+                "current" => false,
             ], 200);
         }
 
@@ -37,25 +38,19 @@ class FavoriteController extends Controller
 
         return response([
             "message" => "Added Successfully 🔥",
+            "current" => true,
         ], 201);
     }
 
     public function getFavorite()
     {
-        $user = Auth::user();
+        $user_id = Auth::user()->id;
+        $user = User::find($user_id);
+
         $favoriteProducts = $user->favorites()->with("product")->get()->map(function ($favorite) {
             return $favorite->product;
         });
 
         return new ProductCollection($favoriteProducts);
-    }
-
-    public function productIsFavorite(string $id)
-    {
-        $user_id = Auth::user()->id;
-        $exist = Favorite::where("user_id", $user_id)->where("product_id", $id)->first();
-
-        if (empty($exist)) return response(["Answer" => false], 200);
-        else return response(["Answer" => true], 200);
     }
 }
