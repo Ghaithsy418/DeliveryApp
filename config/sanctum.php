@@ -65,8 +65,8 @@ return [
     ],
 
     'session' => [
-        "driver" => env("SESSION_DRIVER", "file"),
-        "lifetime" => env("SESSION_LIFETIME",120),
+        "driver" => env("SESSION_DRIVER", "database"),
+        "lifetime" => env("SESSION_LIFETIME",43200),
         "expire_on_close" => false,
     ]
 

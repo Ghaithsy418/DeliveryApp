@@ -21,32 +21,32 @@ use Laravel\Sanctum\Sanctum;
 
 
 
-Route::group(["prefix"=>"v1"],function(){
-    Route::group(["middleware" => ["auth:sanctum"]],function(){
+Route::group(["prefix" => "v1"], function () {
+    Route::group(["middleware" => ["auth:sanctum"]], function () {
 
         /*
             ################### User Routes (Authentication required) ###################
         */
-        Route::apiResource("users",UserController::class);
-        Route::post("/logout",[UserController::class,"Logout"]);
-        Route::get("/search/{name}",[UserController::class,"search"]);
-        Route::get("/purchases",[UserController::class,"purchasedProducts"]);
-        Route::post("/user-update",[UserController::class,"update"]);
+        Route::apiResource("users", UserController::class);
+        Route::post("/logout", [UserController::class, "Logout"]);
+        Route::get("/search/{name}", [UserController::class, "search"]);
+        Route::get("/purchases", [UserController::class, "purchasedProducts"]);
+        Route::post("/user-update", [UserController::class, "update"]);
 
         // ################################################################################
 
         /*
         ################### Product Routes (Authentication required) ###################
         */
-        Route::apiResource("products",ProductController::class);
-        Route::middleware(["startsession","shareerrors"])->group(function(){
-            Route::post("/add-to-cart/{id}",[ProductController::class,"AddToCart"]);
-            Route::post("/add-all-to-cart",[ProductController::class,"addAllToCart"]);
-            Route::get("get-cart",[ProductController::class,"GetCart"]);
-            Route::delete("/delete-cart-product/{id}",[ProductController::class,"DeleteCartProduct"]);
-            Route::post("/product-update/{id}",[ProductController::class,"update"]);
-            Route::post("/purchase-products",[ProductController::class,"purchase"]);
-            Route::get("/categories/{type}",[ProductController::class,"categories"]);
+        Route::apiResource("products", ProductController::class);
+        Route::middleware(["startsession", "shareerrors"])->group(function () {
+            Route::post("/add-to-cart/{id}", [ProductController::class, "AddToCart"]);
+            Route::post("/add-all-to-cart", [ProductController::class, "addAllToCart"]);
+            Route::get("get-cart", [ProductController::class, "GetCart"]);
+            Route::delete("/delete-cart-product/{id}", [ProductController::class, "DeleteCartProduct"]);
+            Route::post("/product-update/{id}", [ProductController::class, "update"]);
+            Route::post("/purchase-products", [ProductController::class, "purchase"]);
+            Route::get("/categories/{type}", [ProductController::class, "categories"]);
         });
 
         // ################################################################################
@@ -55,9 +55,9 @@ Route::group(["prefix"=>"v1"],function(){
         /*
             ################### Store Routes (Authentication required) ###################
         */
-        Route::apiResource("stores",StoreController::class);
-        Route::delete("/delete-all/{id}",[StoreController::class,"destroyAll"]);
-        Route::post("/store-update/{id}",[StoreController::class,"update"]);
+        Route::apiResource("stores", StoreController::class);
+        Route::delete("/delete-all/{id}", [StoreController::class, "destroyAll"]);
+        Route::post("/store-update/{id}", [StoreController::class, "update"]);
 
         // ################################################################################
 
@@ -65,11 +65,13 @@ Route::group(["prefix"=>"v1"],function(){
             ################## Favorite Routes (Authentication required) ##################
         */
 
-        Route::post("/add-favorite/{id}",[FavoriteController::class,"addFavorite"]);
-        Route::get("/get-favorite",[FavoriteController::class,"getFavorite"]);
+        Route::post("/add-favorite/{id}", [FavoriteController::class, "addFavorite"]);
+        Route::get("/get-favorite", [FavoriteController::class, "getFavorite"]);
     });
 
     // User Routes (NO Auth required)
-    Route::post("/register",[UserController::class,"Register"]);
-    Route::post("/login",[UserController::class,"Login"]);
+    Route::middleware(["startsession", "shareerrors"])->group(function () {
+        Route::post("/register", [UserController::class, "Register"]);
+        Route::post("/login", [UserController::class, "Login"]);
+    });
 });
