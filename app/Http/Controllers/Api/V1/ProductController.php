@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Http\Requests\V1\StoreProductRequest;
 use App\Http\Requests\V1\UpdateProductRequest;
+use App\Http\Resources\V1\OrderCollection;
 use App\Http\Resources\V1\ProductCollection;
 use App\Http\Resources\V1\ProductResource;
 use App\Jobs\FulfillOrder;
@@ -216,7 +217,8 @@ class ProductController extends Controller
         $user_id = Auth::user()->id;
         $user = User::find($user_id);
 
-        return response([$user->orders()->with("orderItems.product")->get()]);
+        $data = new OrderCollection($user->orders()->with("orderItems.product")->get());
+        return response($data,200);
     }
 
     public function categories(string $category)
