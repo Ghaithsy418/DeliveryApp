@@ -44,12 +44,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function products(){
-        return $this->belongsToMany(Product::class,"users_products_pivot")->withPivot("quantity");
-    }
-
     public function favorites(){
         return $this->hasMany(Favorite::class);
+    }
+
+    public function orders(){
+        return $this->hasMany(Order::class);
     }
 
 }

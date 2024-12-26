@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users_products_pivot', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->integer("user_id");
-            $table->integer("product_id");
-            $table->integer("quantity")->default(0);
+            $table->unsignedBigInteger("user_id");
+            $table->integer("total_price");
+            $table->string("status")->default("pending");
             $table->timestamps();
+            $table->foreign("user_id")->references("id")->on("users");
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users_products_pivot');
+        Schema::dropIfExists('orders');
     }
 };

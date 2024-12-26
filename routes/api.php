@@ -46,6 +46,7 @@ Route::group(["prefix" => "v1"], function () {
             Route::delete("/delete-cart-product/{id}", [ProductController::class, "DeleteCartProduct"]);
             Route::post("/product-update/{id}", [ProductController::class, "update"]);
             Route::post("/purchase-products", [ProductController::class, "purchase"]);
+            Route::get("/get-orders",[ProductController::class,"getOrders"]);
             Route::get("/categories/{type}", [ProductController::class, "categories"]);
         });
 

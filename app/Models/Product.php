@@ -25,13 +25,12 @@ class Product extends Model
         return $this->hasOne(Store::class);
     }
 
-    public function users()
-    {
-        return $this->belongsToMany(User::class, "users_products_pivot");
-    }
-
     public function favorites(){
         return $this->hasMany(Favorite::class);
+    }
+
+    public function orderItems(){
+        return $this->hasMany(OrderItem::class);
     }
 
 }
