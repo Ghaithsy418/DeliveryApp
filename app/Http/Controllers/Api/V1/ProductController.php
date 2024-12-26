@@ -155,25 +155,23 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function purchase()
+    public function purchase(Request $request)
     {
 
         $user_id = Auth::user()->id;
 
-        $cart = Session::get("cart" . (string)$user_id);
-
-
-        if (!$cart) return response(["message" => "Nothing to purchase :("]);
-
-        foreach ($cart->items as $product) {
-            $product_id = $product["item"]["id"];
+        foreach ($request->all() as $product) {
+            $product_id = $product["id"];
             $quantity = $product["quantity"];
 
-            $product = Product::find($product_id);
+            $the_product = Product::find($product_id);
 
-            $product->update([
-                "count" => $product->count - $quantity,
-                "sold_count" => $product->count + $quantity,
+            if($the_product->count < $quantity) return response(["message" => "not enough quantity"], 404);
+
+
+            $the_product->update([
+                "count" => $the_product->count - $quantity,
+                "sold_count" => $the_product->sold_count + $quantity,
             ]);
 
             $column = DB::table("users_products_pivot")->where("user_id", $user_id)->where("product_id", $product_id);
@@ -191,16 +189,17 @@ class ProductController extends Controller
                 ]);
             }
         }
-        $response = [$cart];
 
         Session::forget("cart" . (string)$user_id);
-
-        return response($response, 200);
+        return response(["message"=>"Done Successfully"],200);
     }
 
-    public function categories(string $type)
+    public function categories(string $category)
     {
-        $product = Product::where("type", $type)->get();
-        return $product;
+        $product = Product::where("category", $category)->first();
+
+        if(empty($product)) return response(["message" => "didn't find any product"],404);
+
+        return new ProductResource($product);
     }
 }

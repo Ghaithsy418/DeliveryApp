@@ -40,14 +40,15 @@ class StoreController extends Controller
      */
     public function store(StoreStoreRequest $request)
     {
-        $path = $request->file("imageSource")->store("stores-images", "public");
-
+        if ($request->hasFile("imageSource")) {
+            $path = $request->file("imageSource")->store("stores-images", "public");
+        }
         return new StoreResource(Store::create([
             "name" => $request->name,
             "type" => $request->type,
             "description" => $request->description,
             "location" => $request->location,
-            "image_source" => $path,
+            "image_source" => $path ? $path : "",
         ]));
     }
 

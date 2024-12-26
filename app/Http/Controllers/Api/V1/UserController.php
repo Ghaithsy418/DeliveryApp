@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\v1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\RegisterRequest;
 use App\Http\Resources\V1\ProductCollection;
+use App\Http\Resources\V1\StoreCollection;
 use Illuminate\Http\Request;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Resources\V1\UserCollection;
@@ -133,6 +134,9 @@ class UserController extends Controller
         $stores = Store::where("name", "like", "%" . $name . "%")->get();
         $products = Product::where("name", "like", "%" . $name . "%")->get();
 
-        return response(["The Stores" => $stores, "The Products" => $products], 200);
+        $stores_collection = new StoreCollection($stores);
+        $products_collection = new ProductCollection($products);
+
+        return response(["The Stores" => $stores_collection, "The Products" => $products_collection], 200);
     }
 }

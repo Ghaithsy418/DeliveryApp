@@ -29,19 +29,19 @@ class Cart
         }
 
         if ($curr_item) {
-            $curr_item["quantity"] += $quantity;
-            $curr_item["price"] = $item->price * $curr_item["quantity"];
+            $curr_item["quantity"] += (int)$quantity;
+            $curr_item["price"] = (int)($item->price * $curr_item["quantity"]);
         } else {
             $curr_item = [
-                "quantity" => $quantity,
-                "price" => $item->price * $quantity,
+                "quantity" => (int)$quantity,
+                "price" => (int)($item->price * $quantity),
                 "item" => $item
             ];
             $this->items[] = $curr_item;
         }
 
-        $this->total_quantity += $quantity;
-        $this->total_price += ($item->price * $quantity);
+        $this->total_quantity += (int)$quantity;
+        $this->total_price += (int)($item->price * $quantity);
     }
 
 
