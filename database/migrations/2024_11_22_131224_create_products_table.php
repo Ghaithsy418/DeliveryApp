@@ -16,12 +16,16 @@ return new class extends Migration
             $table->string("name",25);
             $table->text("description");
             $table->string("category",25); // Food , Electronics , Gifts ......
-            $table->integer("price");
+            $table->float("price");
             $table->integer("count");
             $table->integer("sold_count")->default(0);
             $table->integer("store_id");
             $table->string("image_source")->default("");
             $table->timestamps();
+
+            // indexes for improving the performance
+            $table->index("store_id");
+            $table->index("category");
         });
     }
 

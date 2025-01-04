@@ -22,7 +22,7 @@ class Product extends Model
 
     public function store()
     {
-        return $this->hasOne(Store::class);
+        return $this->belongsTo(Store::class);
     }
 
     public function favorites(){

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\RegisterRequest;
 use App\Http\Resources\V1\ProductCollection;
 use App\Http\Resources\V1\StoreCollection;
+use App\Traits\LoginTrait;
 use Illuminate\Http\Request;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Resources\V1\UserCollection;
@@ -25,44 +26,26 @@ use Laravel\Sanctum\Sanctum;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use LoginTrait;
     public function index()
     {
         return new UserCollection(User::all());
     }
 
-
-    public function Login(Request $request)
+    public function basicLogin(Request $request)
     {
-        $data = $request->validate([
-            "phone" => "required",
-            "password" => "required",
-        ]);
+        return $this->loginTrait($request,["basicToken","none"]);
+    }
 
-        $user = User::where("phone", $data["phone"])->first();
-
-        if (!$user || !Hash::check($data["password"], $user->password)) {
-            return response([
-                "message" => "Your phone or password isn't correct plz try again",
-            ], 401);
-        }
-
-        $token = $user->createToken("myToken")->plainTextToken;
-
-        $user["token"] = $token;
-        $user->save();
-
-        $user_datas = new UserResource(User::find($user->id));
-        return response([$user_datas], 200);
+    public function adminLogin(Request $request){
+        return $this->loginTrait($request,["adminToken","create"]);
     }
 
 
     /**
      * Register a new User
      */
-    public function Register(RegisterRequest $request)
+    public function register(RegisterRequest $request)
     {
         $user = new UserResource(User::create([
             "first_name" => $request->firstName,
@@ -72,7 +55,7 @@ class UserController extends Controller
             "password" => bcrypt($request->password),
         ]));
 
-        $token = $user->createToken("myToken")->plainTextToken;
+        $token = $user->createToken("basicToken",["none"])->plainTextToken;
 
         $user["token"] = $token;
         $user->save();
@@ -83,7 +66,7 @@ class UserController extends Controller
     /*
     LogingOut from the app :(
     */
-    public function Logout(Request $request)
+    public function logout(Request $request)
     {
         // $request->user()->currentAccessToken()->delete();
         $accessToken = $request->bearerToken();
@@ -98,8 +81,10 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show()
     {
+        $userId = Auth::user()->id;
+        $user = User::find($userId);
         return new UserResource($user);
     }
 

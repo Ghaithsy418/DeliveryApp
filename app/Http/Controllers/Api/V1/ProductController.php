@@ -13,6 +13,7 @@ use App\Http\Resources\V1\ProductCollection;
 use App\Http\Resources\V1\ProductResource;
 use App\Jobs\FulfillOrder;
 use App\Models\Cart;
+use App\Models\Favorite;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -122,7 +123,7 @@ class ProductController extends Controller
         }
         Session::put("cart" . (string)$user_id, $cart);
 
-        return [$cart];
+        return response(["message"=>"good"],200);
     }
 
     public function GetCart()
@@ -133,7 +134,7 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function DeleteCartProduct(Request $request, string $id)
+    public function DeleteCartProduct(string $id)
     {
 
         $currUserId = Auth::user()->id;
@@ -160,7 +161,7 @@ class ProductController extends Controller
 
     public function purchase(Request $request)
     {
-        if(!$request->all()) return response(["message"=> "Nothing to add here"],404);
+        if (!$request->all()) return response(["message" => "Nothing to add here"], 404);
         $user_id = Auth::user()->id;
         $old_cart = null;
         $cart = new Cart($old_cart);
@@ -204,29 +205,49 @@ class ProductController extends Controller
 
             FulfillOrder::dispatch($order->id)->delay(now()->addMinutes(1));
 
-            return response(["message"=>"Order placed successfully"],200);
-
+            return response(["message" => "Order placed successfully"], 200);
         } catch (\Exception $err) {
             DB::rollBack();
-            return response(["message"=> "Something went wrong, plz try again!","error" => $err->getMessage()],500);
+            return response(["message" => "Something went wrong, plz try again!", "error" => $err->getMessage()], 500);
         }
     }
 
 
-    public function getOrders(){
+    public function getOrders()
+    {
         $user_id = Auth::user()->id;
         $user = User::find($user_id);
 
         $data = new OrderCollection($user->orders()->with("orderItems.product")->get());
-        return response($data,200);
+        return response($data, 200);
     }
 
     public function categories(string $category)
     {
-        $product = Product::where("category", $category)->first();
+        $product = Product::where("category", $category)->get();
 
         if (empty($product)) return response(["message" => "didn't find any product"], 404);
 
-        return new ProductResource($product);
+        return new ProductCollection($product);
+    }
+
+    public function getInvoice(Request $request)
+    {
+
+        if(!$request->all()) return response(["message" => "nothing to give you"],404);
+
+        $products = [];
+        $totalPrice = 0;
+
+        foreach ($request->all() as $item) {
+            $product = Product::find($item["id"]);
+            $info = ["name" => $product->name, "price" => $product->price * $item["quantity"], "quantity" => $item["quantity"]];
+            array_push($products, $info);
+            $totalPrice += $product->price * $item["quantity"];
+        }
+
+        array_push($products, ["totalPrice" => $totalPrice]);
+
+        return response([$products], 200);
     }
 }

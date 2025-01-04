@@ -40,6 +40,7 @@ class StoreController extends Controller
      */
     public function store(StoreStoreRequest $request)
     {
+        $path = null;
         if ($request->hasFile("imageSource")) {
             $path = $request->file("imageSource")->store("stores-images", "public");
         }

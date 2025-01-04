@@ -28,10 +28,11 @@ Route::group(["prefix" => "v1"], function () {
             ################### User Routes (Authentication required) ###################
         */
         Route::apiResource("users", UserController::class);
-        Route::post("/logout", [UserController::class, "Logout"]);
+        Route::post("/logout", [UserController::class, "logout"]);
         Route::get("/search/{name}", [UserController::class, "search"]);
         Route::get("/purchases", [UserController::class, "purchasedProducts"]);
         Route::post("/user-update", [UserController::class, "update"]);
+        Route::get("/show-curr-user",[UserController::class,"show"]);
 
         // ################################################################################
 
@@ -48,6 +49,7 @@ Route::group(["prefix" => "v1"], function () {
             Route::post("/purchase-products", [ProductController::class, "purchase"]);
             Route::get("/get-orders",[ProductController::class,"getOrders"]);
             Route::get("/categories/{type}", [ProductController::class, "categories"]);
+            Route::post("/get-invoice",[ProductController::class,"getInvoice"]);
         });
 
         // ################################################################################
@@ -72,7 +74,8 @@ Route::group(["prefix" => "v1"], function () {
 
     // User Routes (NO Auth required)
     Route::middleware(["startsession", "shareerrors"])->group(function () {
-        Route::post("/register", [UserController::class, "Register"]);
-        Route::post("/login", [UserController::class, "Login"]);
+        Route::post("/register", [UserController::class, "register"]);
+        Route::post("/login", [UserController::class, "basicLogin"]);
+        Route::post("/admin-login",[UserController::class,"adminLogin"]);
     });
 });

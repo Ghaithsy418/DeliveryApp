@@ -19,6 +19,10 @@ return new class extends Migration
             $table->string("location",50);
             $table->string("image_source")->default("");
             $table->timestamps();
+
+            //indexes for improving the performance
+            $table->index("name");
+            $table->index("type");
         });
     }
 
