@@ -13,7 +13,6 @@ use App\Http\Resources\V1\ProductCollection;
 use App\Http\Resources\V1\ProductResource;
 use App\Jobs\FulfillOrder;
 use App\Models\Cart;
-use App\Models\Favorite;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -231,23 +230,21 @@ class ProductController extends Controller
         return new ProductCollection($product);
     }
 
-    public function getInvoice(Request $request)
-    {
-
-        if(!$request->all()) return response(["message" => "nothing to give you"],404);
-
+    public function getInvoice(Request $request){
         $products = [];
         $totalPrice = 0;
+        if(!$request->all()) return response(["message" => "nothing to give you"],404);
 
-        foreach ($request->all() as $item) {
+        foreach($request['items'] as $item){
             $product = Product::find($item["id"]);
-            $info = ["name" => $product->name, "price" => $product->price * $item["quantity"], "quantity" => $item["quantity"]];
-            array_push($products, $info);
+            $info = ["name" => $product->name,"price" => $product->price * $item["quantity"], "quantity" => $item["quantity"]];
+            array_push($products,$info);
             $totalPrice += $product->price * $item["quantity"];
         }
 
         array_push($products, ["totalPrice" => $totalPrice]);
 
-        return response([$products], 200);
+
+        return response($products, 200);
     }
 }

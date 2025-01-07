@@ -4,9 +4,7 @@ use App\Http\Controllers\Api\V1\FavoriteController;
 use App\Http\Controllers\api\v1\ProductController;
 use App\Http\Controllers\api\v1\StoreController;
 use App\Http\Controllers\api\v1\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Sanctum;
 
 /*
 |--------------------------------------------------------------------------

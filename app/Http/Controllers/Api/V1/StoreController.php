@@ -10,7 +10,6 @@ use App\Http\Resources\V1\StoreResource;
 use App\Http\Resources\V1\StoreCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Response;
 
 class StoreController extends Controller
 {

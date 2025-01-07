@@ -11,18 +11,11 @@ use Illuminate\Http\Request;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Resources\V1\UserCollection;
 use App\Http\Requests\V1\UpdateUserRequest;
-use App\Http\Resources\V1\UserWithSessionIdResource;
-use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
-use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
 use Laravel\Sanctum\PersonalAccessToken;
-use Laravel\Sanctum\Sanctum;
 
 class UserController extends Controller
 {
