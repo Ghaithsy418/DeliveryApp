@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
@@ -19,20 +21,32 @@ class FCMService
 
     public function sendNotification($deviceToken, $title, $body, array $data = [])
     {
-        $notification = Notification::create($title, $body);
+        try{
+            $notification = Notification::create($title, $body);
 
-        $message = CloudMessage::withTarget("token", $deviceToken)->withNotification($notification)->withData($data);
-        return $this->messaging->send($message);
-    }
+            if(is_array($deviceToken)){
 
-    public function notifyUsers(){
-        $title = "Welcome Message";
-        $body = "Welcome guys to our brand new Shamify App 😁";
-
-        $users = $this->userRepsitory->getAllUsersHasFcmToken();
-
-        foreach($users as $user){
-            $this->sendNotification($user->fcm_token, $title, $body,[]);
+                $messages = array_map(function($token) use ($notification, $data){
+                    return CloudMessage::new()->toToken($token)->withNotification($notification)->withData($data);
+                }, $deviceToken);
+                return $this->messaging->sendAll($messages);
+            }else{
+                $message = CloudMessage::new()->toToken($deviceToken)->withNotification($notification)->withData($data);
+                return $this->messaging->send($message);
+            }
+        }catch(\Exception $e){
+            return false;
         }
     }
+
+    public function notifyUsers($title,$body){
+
+        $usersFcmTokens = User::whereNotNull("fcm_token")->pluck("fcm_token")->toArray();
+        $this->sendNotification($usersFcmTokens, $title, $body, []);
+    }
+
+    public function singleNotification($userFcmToken,$title,$body){
+        if($userFcmToken)  $this->sendNotification($userFcmToken, $title, $body, []);
+    }
+
 }

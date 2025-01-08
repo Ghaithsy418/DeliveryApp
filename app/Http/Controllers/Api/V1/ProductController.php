@@ -12,8 +12,10 @@ use App\Http\Resources\V1\OrderCollection;
 use App\Http\Resources\V1\ProductCollection;
 use App\Http\Resources\V1\ProductResource;
 use App\Jobs\FulfillOrder;
+use App\Jobs\OrderNotification;
 use App\Models\Cart;
 use App\Models\User;
+use App\Services\FCMService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -36,9 +38,10 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
+        $product = null;
         if ($request->hasFile("imageSource")) {
             $path = $request->file("imageSource")->store("products-images", "public");
-            return new ProductResource(Product::create([
+            $product = new ProductResource(Product::create([
                 "name" => $request->name,
                 "description" => $request->description,
                 "category" => $request->category,
@@ -49,8 +52,12 @@ class ProductController extends Controller
                 "image_source" => $path,
             ]));
         } else {
-            return new ProductResource(Product::create($request->all()));
+            $product = new ProductResource(Product::create($request->all()));
         }
+        $fcmService = new FCMService();
+        $user = Auth::user();
+        $fcmService->notifyUsers("Product has been Added",(string)"the Admin ".$user->first_name." has added ".$product->name);
+        return response([$product],201);
     }
 
     /**
@@ -202,7 +209,8 @@ class ProductController extends Controller
             Session::forget("cart" . (string)$user_id);
             DB::commit();
 
-            FulfillOrder::dispatch($order->id)->delay(now()->addMinutes(1));
+            $userFcmToken = User::find($user_id)->fcm_token;
+            FulfillOrder::dispatch($order->id,$userFcmToken)->delay(now()->addMinutes(1));
 
             return response(["message" => "Order placed successfully"], 200);
         } catch (\Exception $err) {

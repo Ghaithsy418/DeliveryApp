@@ -53,7 +53,12 @@ class UserController extends Controller
         $token = $user->createToken("basicToken", ["none"])->plainTextToken;
 
         $user["token"] = $token;
-        $user["fcm_token"] = $request->fcmToken ? $request->fcmToken : null;
+        if ($request->fcmToken) {
+            $user["fcm_token"] = $request->fcmToken;
+            $fcmService = new FCMService();
+            $fcmService->singleNotification($request->fcmToken, "Welcome", "Welcome to our Great Shamify Application💚");
+        }
+
         $user->save();
 
         return response([$user], 201);
@@ -119,13 +124,5 @@ class UserController extends Controller
         $products_collection = new ProductCollection($products);
 
         return response(["The Stores" => $stores_collection, "The Products" => $products_collection], 200);
-    }
-
-    public function testNotification()
-    {
-        $fcmService = new FCMService();
-        $fcmService->notifyUsers();
-
-        return response(["message" => "Done Successfully"], 200);
     }
 }
