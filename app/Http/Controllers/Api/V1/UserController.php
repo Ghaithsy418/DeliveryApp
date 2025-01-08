@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\RegisterRequest;
 use App\Http\Resources\V1\ProductCollection;
 use App\Http\Resources\V1\StoreCollection;
+use App\Services\FCMService;
 use App\Traits\LoginTrait;
 use Illuminate\Http\Request;
 use App\Http\Resources\V1\UserResource;
@@ -27,11 +28,12 @@ class UserController extends Controller
 
     public function basicLogin(Request $request)
     {
-        return $this->loginTrait($request,["basicToken","none"]);
+        return $this->loginTrait($request, ["basicToken", "none"]);
     }
 
-    public function adminLogin(Request $request){
-        return $this->loginTrait($request,["adminToken","create"]);
+    public function adminLogin(Request $request)
+    {
+        return $this->loginTrait($request, ["adminToken", "create"]);
     }
 
 
@@ -48,9 +50,10 @@ class UserController extends Controller
             "password" => bcrypt($request->password),
         ]));
 
-        $token = $user->createToken("basicToken",["none"])->plainTextToken;
+        $token = $user->createToken("basicToken", ["none"])->plainTextToken;
 
         $user["token"] = $token;
+        $user["fcm_token"] = $request->fcmToken ? $request->fcmToken : null;
         $user->save();
 
         return response([$user], 201);
@@ -61,10 +64,10 @@ class UserController extends Controller
     */
     public function logout(Request $request)
     {
-        // $request->user()->currentAccessToken()->delete();
-        $accessToken = $request->bearerToken();
-        $token = PersonalAccessToken::find($accessToken);
-        $token->delete();
+        $user = $request->user();
+        $user->fcm_token = null;
+        $request->user()->currentAccessToken()->delete();
+        $user->save();
 
         return response([
             "message" => "You logged out Successfully"
@@ -116,5 +119,13 @@ class UserController extends Controller
         $products_collection = new ProductCollection($products);
 
         return response(["The Stores" => $stores_collection, "The Products" => $products_collection], 200);
+    }
+
+    public function testNotification()
+    {
+        $fcmService = new FCMService();
+        $fcmService->notifyUsers();
+
+        return response(["message" => "Done Successfully"], 200);
     }
 }

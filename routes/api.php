@@ -31,6 +31,7 @@ Route::group(["prefix" => "v1"], function () {
         Route::get("/purchases", [UserController::class, "purchasedProducts"]);
         Route::post("/user-update", [UserController::class, "update"]);
         Route::get("/show-curr-user",[UserController::class,"show"]);
+        Route::get("/test-notification",[UserController::class,"testNotification"]);
 
         // ################################################################################
 

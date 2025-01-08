@@ -34,7 +34,6 @@ class ProductResource extends JsonResource
         else
             $photo_url = Storage::url("public/" . $this->image_source);
 
-
         return [
             "id" => $this->id,
             "name" => $this->name,

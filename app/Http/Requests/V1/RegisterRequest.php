@@ -22,32 +22,15 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // "first_name" => ["required"],
-            // "last_name" => ["required"],
             "phone" => ["required","unique:users,phone","max:11"],
-            // "location" => ["required"],
             "password" => ["required","min:8","string"],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        if($this->imageSource){
-            $this->merge([
-                "image_source" => $this->imageSource,
-            ]);
-        }
-
-        $this->merge([
-            "first_name" => $this->firstName,
-            "last_name" => $this->lastName,
-        ]);
     }
 
     public function messages()
     {
         return [
-            "phone.unique" => "this phone is used before plz try another one",
+            "phone.unique" => "this phone has used before plz try another one",
             "phone.max" => "this phone must not be greater than 11 numbers",
         ];
     }

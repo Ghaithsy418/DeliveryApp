@@ -28,6 +28,7 @@ trait LoginTrait {
         $token = $user->createToken("{$status[0]}",[$status[1]])->plainTextToken;
 
         $user["token"] = $token;
+        $user["fcm_token"] = $request->fcmToken ? $request->fcmToken : null;
         $user->save();
 
         $user_datas = new UserResource(User::find($user->id));
