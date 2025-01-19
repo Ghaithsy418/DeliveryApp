@@ -20,19 +20,19 @@ class ProductResource extends JsonResource
 
         //#################### Check if the Product is from a User Favorite List #########################
 
-        $is_favorite = false;
+        $isFavorite = false;
         $id = $this->id;
-        $user_id = Auth::user()->id;
-        $exist = Favorite::where("user_id", $user_id)->where("product_id", $id)->first();
-        if (!empty($exist)) $is_favorite = true;
+        $userId = Auth::user()->id;
+        $exist = Favorite::where("user_id", $userId)->where("product_id", $id)->first();
+        if (!empty($exist)) $isFavorite = true;
 
         //#################################################################################################
         //############################## Get the Product Image's URL ######################################
 
         if ($this->image_source === "")
-            $photo_url = "";
+            $photoUrl = "";
         else
-            $photo_url = Storage::url("public/" . $this->image_source);
+            $photoUrl = Storage::url("public/" . $this->image_source);
 
         return [
             "id" => $this->id,
@@ -41,8 +41,8 @@ class ProductResource extends JsonResource
             "category" => $this->category,
             "price" => $this->price,
             "count" => $this->count,
-            "imageURL" => $photo_url,
-            "isFavorite" => $is_favorite,
+            "imageURL" => $photoUrl,
+            "isFavorite" => $isFavorite,
         ];
     }
 }

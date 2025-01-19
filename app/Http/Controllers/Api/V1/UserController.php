@@ -52,7 +52,6 @@ class UserController extends Controller
 
         $token = $user->createToken("basicToken", ["none"])->plainTextToken;
 
-        $user["token"] = $token;
         if ($request->fcmToken) {
             $user["fcm_token"] = $request->fcmToken;
             $fcmService = new FCMService();
@@ -61,7 +60,7 @@ class UserController extends Controller
 
         $user->save();
 
-        return response([$user], 201);
+        return response([["id" => $user->id, "firstName" => $user->first_name, "lastName" => $user->last_name, "phone" => $user->phone, "location" => $user->location, "token" => $token]], 201);
     }
 
     /*
@@ -94,8 +93,8 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request)
     {
-        $user_id = Auth::user()->id;
-        $user = User::find($user_id);
+        $userId = Auth::user()->id;
+        $user = User::find($userId);
 
         if (!$user) {
             return response([
@@ -120,9 +119,9 @@ class UserController extends Controller
         $stores = Store::where("name", "like", "%" . $name . "%")->get();
         $products = Product::where("name", "like", "%" . $name . "%")->get();
 
-        $stores_collection = new StoreCollection($stores);
-        $products_collection = new ProductCollection($products);
+        $storesCollection = new StoreCollection($stores);
+        $productsCollection = new ProductCollection($products);
 
-        return response(["The Stores" => $stores_collection, "The Products" => $products_collection], 200);
+        return response(["The Stores" => $storesCollection, "The Products" => $productsCollection], 200);
     }
 }

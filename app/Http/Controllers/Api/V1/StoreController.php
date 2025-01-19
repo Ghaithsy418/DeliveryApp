@@ -23,12 +23,12 @@ class StoreController extends Controller
         if ($request->query("withProducts")) {
             $storesQuery->with("products");
             $stores = $storesQuery->paginate()->appends($request->query());
-            $products_count = DB::table("products")->count();
-            $stores_count = DB::table("stores")->count();
+            $productsCount = DB::table("products")->count();
+            $storesCount = DB::table("stores")->count();
             return response([
                 "data" => new StoreCollection($stores),
-                "productsCount" => $products_count,
-                "storesCount" => $stores_count,
+                "productsCount" => $productsCount,
+                "storesCount" => $storesCount,
             ], 200);
         }
         return new StoreCollection(Store::all());

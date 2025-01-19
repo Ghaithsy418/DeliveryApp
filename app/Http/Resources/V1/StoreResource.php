@@ -17,8 +17,11 @@ class StoreResource extends JsonResource
     {
 
         //##################### Get The Photos URLs ###########################
-
-        $photo_url = Storage::url("public/" . $this->image_source);
+        if(!$this->image_source){
+            $photo_url = "";
+        }else{
+            $photo_url = Storage::url("public/" . $this->image_source);
+        }
 
         //#####################################################################
 

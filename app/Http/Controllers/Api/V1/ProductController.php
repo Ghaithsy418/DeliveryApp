@@ -56,8 +56,8 @@ class ProductController extends Controller
         }
         $fcmService = new FCMService();
         $user = Auth::user();
-        $fcmService->notifyUsers("Product has been Added",(string)"the Admin ".$user->first_name." has added ".$product->name);
-        return response([$product],201);
+        $fcmService->notifyUsers("Product has been Added", (string)"the Admin " . $user->first_name . " has added " . $product->name);
+        return response([$product], 201);
     }
 
     /**
@@ -99,12 +99,12 @@ class ProductController extends Controller
 
         if (!$product) return response(["message" => "No Product with this id"], 404);
 
-        $curr_user_id = Auth::user()->id;
-        $old_cart = Session::has("cart" . (string)$curr_user_id) ? Session::get("cart" . (string)$curr_user_id) : null;
-        $cart = new Cart($old_cart);
+        $currUserId = Auth::user()->id;
+        $oldCart = Session::has("cart" . (string)$currUserId) ? Session::get("cart" . (string)$currUserId) : null;
+        $cart = new Cart($oldCart);
         $cart->add($product, $product->id, $quantity["quantity"]);
 
-        Session::put("cart" . (string)$curr_user_id, $cart);
+        Session::put("cart" . (string)$currUserId, $cart);
 
         return response([
             "message" => "Added Successfully",
@@ -114,22 +114,22 @@ class ProductController extends Controller
 
     public function AddAllToCart()
     {
-        $user_id = Auth::user()->id;
-        $user = User::find($user_id);
+        $userId = Auth::user()->id;
+        $user = User::find($userId);
 
         $favoriteProducts = $user->favorites()->with("product")->get()->map(function ($favorite) {
             return $favorite->product;
         });
 
-        $old_cart = Session::has("cart" . (string)$user_id) ? Session::get("cart" . (string)$user_id) : null;
-        $cart = new Cart($old_cart);
+        $oldCart = Session::has("cart" . (string)$userId) ? Session::get("cart" . (string)$userId) : null;
+        $cart = new Cart($oldCart);
 
         foreach ($favoriteProducts as $product) {
             $cart->add($product, $product->id, 1);
         }
-        Session::put("cart" . (string)$user_id, $cart);
+        Session::put("cart" . (string)$userId, $cart);
 
-        return response(["message"=>"good"],200);
+        return response(["message" => "good"], 200);
     }
 
     public function GetCart()
@@ -168,23 +168,23 @@ class ProductController extends Controller
     public function purchase(Request $request)
     {
         if (!$request->all()) return response(["message" => "Nothing to add here"], 404);
-        $user_id = Auth::user()->id;
-        $old_cart = null;
-        $cart = new Cart($old_cart);
+        $userId = Auth::user()->id;
+        $oldCart = null;
+        $cart = new Cart($oldCart);
         foreach ($request->all() as $product) {
-            $product_id = $product["id"];
+            $productId = $product["id"];
             $quantity = $product["quantity"];
 
-            $the_product = Product::find($product_id);
+            $theProduct = Product::find($productId);
 
-            $cart->add($the_product, $product_id, $quantity);
+            $cart->add($theProduct, $productId, $quantity);
         }
         DB::beginTransaction();
 
         try {
             $order = new Order();
-            $order->user_id = $user_id;
-            $order->total_price = $cart->total_price;
+            $order->user_id = $userId;
+            $order->total_price = $cart->totalPrice;
             $order->status = "pending";
             $order->save();
 
@@ -199,18 +199,18 @@ class ProductController extends Controller
                 $product = Product::find($item["item"]->id);
                 if ($product->count < $item["quantity"]) {
                     DB::rollBack();
-                    return response(["message" => "Not enough quantity for product Name: " . $product->name], 404);
+                    return response(["message" => "Not enough quantity for product: " . $product->name], 404);
                 }
                 $product->update([
                     "count" => $product->count - $item["quantity"],
                     "sold_count" => $product->sold_count + $item["quantity"],
                 ]);
             }
-            Session::forget("cart" . (string)$user_id);
+            Session::forget("cart" . (string)$userId);
             DB::commit();
 
-            $userFcmToken = User::find($user_id)->fcm_token;
-            FulfillOrder::dispatch($order->id,$userFcmToken)->delay(now()->addMinutes(1));
+            $userFcmToken = User::find($userId)->fcm_token;
+            FulfillOrder::dispatch($order->id, $userFcmToken)->delay(now()->addMinutes(1));
 
             return response(["message" => "Order placed successfully"], 200);
         } catch (\Exception $err) {
@@ -222,8 +222,8 @@ class ProductController extends Controller
 
     public function getOrders()
     {
-        $user_id = Auth::user()->id;
-        $user = User::find($user_id);
+        $userId = Auth::user()->id;
+        $user = User::find($userId);
 
         $data = new OrderCollection($user->orders()->with("orderItems.product")->get());
         return response($data, 200);
@@ -238,15 +238,16 @@ class ProductController extends Controller
         return new ProductCollection($product);
     }
 
-    public function getInvoice(Request $request){
+    public function getInvoice(Request $request)
+    {
         $products = [];
         $totalPrice = 0;
-        if(!$request->all()) return response(["message" => "nothing to give you"],404);
+        if (!$request->all()) return response(["message" => "nothing to give you"], 404);
 
-        foreach($request['items'] as $item){
+        foreach ($request['items'] as $item) {
             $product = Product::find($item["id"]);
-            $info = ["name" => $product->name,"price" => $product->price * $item["quantity"], "quantity" => $item["quantity"]];
-            array_push($products,$info);
+            $info = ["name" => $product->name, "price" => $product->price * $item["quantity"], "quantity" => $item["quantity"]];
+            array_push($products, $info);
             $totalPrice += $product->price * $item["quantity"];
         }
 

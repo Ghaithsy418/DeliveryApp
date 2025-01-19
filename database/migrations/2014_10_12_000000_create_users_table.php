@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('phone');
             $table->string("location",50);
             $table->string('password');
-            $table->string("token")->default("");
             $table->string("role")->default("user");
             $table->string("fcm_token")->nullable();
             $table->rememberToken();
@@ -26,7 +25,6 @@ return new class extends Migration
 
             // indexes for improving the performance :)
                 $table->index("phone");
-                $table->index("token");
                 $table->index("role");
         });
     }

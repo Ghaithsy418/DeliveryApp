@@ -5,52 +5,52 @@ namespace App\Models;
 class Cart
 {
     public $items = [];
-    public $total_quantity = 0;
-    public $total_price = 0;
+    public $totalQuantity = 0;
+    public $totalPrice = 0;
 
-    public function __construct($old_cart)
+    public function __construct($oldCart)
     {
-        if ($old_cart) {
-            $this->items = $old_cart->items;
-            $this->total_quantity = $old_cart->total_quantity;
-            $this->total_price = $old_cart->total_price;
+        if ($oldCart) {
+            $this->items = $oldCart->items;
+            $this->totalQuantity = $oldCart->totalQuantity;
+            $this->totalPrice = $oldCart->totalPrice;
         }
     }
 
     public function add($item, $id, $quantity)
     {
-        $curr_item = null;
+        $currItem = null;
 
-        foreach ($this->items as &$cart_item) {
-            if ($cart_item["item"]->id === $id) {
-                $curr_item = &$cart_item;
+        foreach ($this->items as &$cartItem) {
+            if ($cartItem["item"]->id === $id) {
+                $currItem = &$cartItem;
                 break;
             }
         }
 
-        if ($curr_item) {
-            $curr_item["quantity"] += (int)$quantity;
-            $curr_item["price"] = (int)($item->price * $curr_item["quantity"]);
+        if ($currItem) {
+            $currItem["quantity"] += (int)$quantity;
+            $currItem["price"] = (int)($item->price * $currItem["quantity"]);
         } else {
-            $curr_item = [
+            $currItem = [
                 "quantity" => (int)$quantity,
                 "price" => (int)($item->price * $quantity),
                 "item" => $item
             ];
-            $this->items[] = $curr_item;
+            $this->items[] = $currItem;
         }
 
-        $this->total_quantity += (int)$quantity;
-        $this->total_price += (int)($item->price * $quantity);
+        $this->totalQuantity += (int)$quantity;
+        $this->totalPrice += (int)($item->price * $quantity);
     }
 
 
     public function delete($item, $id)
     {
-        foreach ($this->items as $key => $curr_item) {
-            if ($curr_item['item']['id'] === $item->id) {
-                $this->total_quantity -= $curr_item['quantity'];
-                $this->total_price -= $curr_item['price'];
+        foreach ($this->items as $key => $currItem) {
+            if ($currItem['item']['id'] === $item->id) {
+                $this->totalQuantity -= $currItem['quantity'];
+                $this->totalPrice -= $currItem['price'];
                 unset($this->items[$key]);
                 $this->items = array_values($this->items);
                 return true;
